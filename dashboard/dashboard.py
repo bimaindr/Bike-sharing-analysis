@@ -2,11 +2,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
+from pathlib import Path
+
 
 st.set_page_config(page_title="Bike Sharing Analysis Dashboard", layout="wide")
 
 def load_data():
-    return pd.read_csv("main_data.csv")
+    base_path = Path(__file__).parent
+    csv_path = base_path / "main_data.csv"
+    return pd.read_csv(csv_path)
 
 main_data = load_data()
 
@@ -81,3 +85,4 @@ st.pyplot(fig_cluster)
 
 
 st.caption("Copyright © 2026 - Bima Indra Sakti")
+
