@@ -6,8 +6,7 @@ import streamlit as st
 st.set_page_config(page_title="Bike Sharing Analysis Dashboard", layout="wide")
 
 def load_data():
-    df = pd.read_csv("main_data.csv")
-    return df
+    return pd.read_csv("main_data.csv")
 
 main_data = load_data()
 
@@ -79,5 +78,6 @@ sns.scatterplot(
 )
 ax_cluster.set_title("Kluster Kategori Permintaan")
 st.pyplot(fig_cluster)
+
 
 st.caption("Copyright © 2026 - Bima Indra Sakti")
