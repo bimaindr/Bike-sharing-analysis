@@ -15,29 +15,33 @@ def load_data():
 
 all_df = load_data()
 
-# SIDEBAR FILTER
+# SIDEBAR: FILTERING
 with st.sidebar:
     st.image("https://share.google/TPsEJQmFh94HnTdoM")
+    st.header("Filter Eksplorasi")
     
     # Filter Rentang Tanggal
     min_date = all_df["dteday"].min()
     max_date = all_df["dteday"].max()
     
-    start_date, end_date = st.date_input(
-        label='Pilih Rentang Waktu',
-        min_value=min_date,
-        max_value=max_date,
-        value=[min_date, max_date]
-    )
-    
-    # Filter Kategori Musim
+    try:
+        start_date, end_date = st.date_input(
+            label='Rentang Waktu',
+            min_value=min_date,
+            max_value=max_date,
+            value=[min_date, max_date]
+        )
+    except:
+        st.stop()
+
+    # Filter Musim
     selected_season = st.multiselect(
-        label="Filter Musim",
-        options=all_df["season_hour"].unique(),
-        default=all_df["season_hour"].unique()
+        "Pilih Musim:",
+        options=all_df['season_hour'].unique(),
+        default=all_df['season_hour'].unique()
     )
 
-# Menerapkan Filter ke Dataframe utama
+# Filter Dataset Berdasarkan Input Sidebar
 main_df = all_df[
     (all_df["dteday"] >= pd.to_datetime(start_date)) & 
     (all_df["dteday"] <= pd.to_datetime(end_date)) &
@@ -45,56 +49,78 @@ main_df = all_df[
 ]
 
 # MAIN PAGE
-st.title("Bike Sharing Analysis Dashboard")
+st.title("Bicycle Rental Dashboard")
 
-# Metriks Utama yang Berubah Sesuai Filter
+# Metriks Utama
 col1, col2, col3 = st.columns(3)
 with col1:
     st.metric("Total Penyewaan", value=f"{main_df['cnt_hour'].sum():,}")
 with col2:
-    st.metric("Rata-rata Sewa/Jam", value=f"{int(main_df['cnt_hour'].mean())}")
+    st.metric("Rata-rata Sewa/Jam", value=f"{int(main_df['cnt_hour'].mean()):,}")
 with col3:
-    st.metric("Hari Unik", value=f"{main_df['dteday'].nunique()}")
+    st.metric("Total Hari", value=f"{main_df['dteday'].nunique()}")
 
 st.divider()
 
-# Row 2: Visualisasi Pertanyaan 1 (Pola Jam)
-st.subheader("Pola Penyewaan: Hari Kerja vs Akhir Pekan")
-fig, ax = plt.subplots(figsize=(16, 8))
+# PERTANYAAN 1: POLA JAM
+st.subheader("1. Pola Waktu: Hari Kerja vs Akhir Pekan")
+fig_hour, ax_hour = plt.subplots(figsize=(12, 5))
 sns.lineplot(
     data=main_df, 
-    x='hr', 
-    y='cnt_hour', 
-    hue='workingday_hour', 
-    palette={'Weekend/Holiday': '#FFA500', 'Working Day': "#341AB6"},
-    marker='o',
-    ax=ax
+    x='hr', y='cnt_hour', hue='workingday_hour', 
+    palette={'Weekend/Holiday': '#FFA500', 'Working Day': '#6A0DAD'},
+    linewidth=2.5, marker='o', ax=ax_hour
 )
-ax.set_title(f"Rata-rata Penyewaan Sepeda per jam ({start_date} s/d {end_date})", fontsize=20)
-st.pyplot(fig)
+ax_hour.set_xlabel("Jam")
+ax_hour.set_ylabel("Jumlah Penyewa")
+st.pyplot(fig_hour)
 
-# Row 3: Visualisasi Pertanyaan 2 & Clustering
+# PERTANYAAN 2: DAMPAK CUACA & MUSIM (HARIAN)
+st.subheader("2. Dampak Kondisi Lingkungan (Harian)")
 col_a, col_b = st.columns(2)
 
 with col_a:
-    st.subheader("Pengaruh Kondisi Cuaca")
-    fig2, ax2 = plt.subplots()
-    sns.barplot(data=main_df, x='weathersit_hour', y='cnt_hour', palette='magma', ax=ax2)
-    st.pyplot(fig2)
+    st.write("Dampak Kondisi Cuaca (Harian)")
+    fig_weather, ax_weather = plt.subplots()
+    sns.barplot(
+        data=main_df,
+        x='weathersit_day', 
+        y='cnt_day',
+        palette='viridis',
+        ax=ax_weather
+    )
+    ax_weather.set_xlabel('Kondisi Cuaca')
+    ax_weather.set_ylabel('Rata-rata Sewa Harian')
+    st.pyplot(fig_weather)
 
 with col_b:
-    st.subheader("Demand Clustering (Suhu)")
-    fig3, ax3 = plt.subplots()
-    sns.scatterplot(
+    # REVISI: Menggunakan Box Plot untuk Dampak Musim Harian
+    st.write("Distribusi Penyewaan Harian per Musim")
+    fig_season, ax_season = plt.subplots()
+    sns.boxplot(
         data=main_df, 
-        x='temp_hour', y='cnt_hour', 
-        hue='demand_cluster', 
-        palette={'Low Demand': 'red', 'Medium Demand': 'orange', 'High Demand': 'green'},
-        ax=ax3
+        x='season_day', 
+        y='cnt_day', 
+        palette='magma', 
+        ax=ax_season
     )
-    st.pyplot(fig3)
+    ax_season.set_xlabel('Musim')
+    ax_season.set_ylabel('Total Sewa Harian')
+    st.pyplot(fig_season)
 
-st.caption(f"Copyright © 2026 | Analisis oleh Bima Indra Sakti")
+# ANALISIS LANJUTAN
+st.divider()
+st.subheader("3. Advanced Analysis: Demand Clustering")
+fig_cluster, ax_cluster = plt.subplots(figsize=(12, 5))
+sns.scatterplot(
+    data=main_df,
+    x='temp_hour', y='cnt_hour', hue='demand_cluster',
+    palette={'Low Demand': 'red', 'Medium Demand': 'orange', 'High Demand': 'green'},
+    ax=ax_cluster
+)
+st.pyplot(fig_cluster)
+
+st.caption(f"Copyright © 2026 - Bima Indra Sakti | Terakhir diperbarui pada {pd.Timestamp.now().strftime('%Y-%m-%d')}")
 
 
 
