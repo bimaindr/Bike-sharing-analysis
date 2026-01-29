@@ -9,7 +9,7 @@ st.set_page_config(page_title="Bike Sharing Analysis", layout="wide")
 # LOAD DATA 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("dashboard/main_data.csv)
+    df = pd.read_csv("dashboard/main_data.csv")
     df['dteday'] = pd.to_datetime(df['dteday'])
     return df
 
@@ -95,4 +95,5 @@ with col_b:
     st.pyplot(fig3)
 
 st.caption(f"Copyright © 2026 | Analisis oleh Bima Indra Sakti")
+
 
