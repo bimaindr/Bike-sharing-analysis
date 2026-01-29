@@ -66,11 +66,11 @@ sns.lineplot(
     x='hr', 
     y='cnt_hour', 
     hue='workingday_hour', 
-    palette="viridis",
+    palette={'Weekend/Holiday': '#FFA500', 'Working Day': "#341AB6"},
     marker='o',
     ax=ax
 )
-ax.set_title(f"Tren per Jam ({start_date} s/d {end_date})", fontsize=20)
+ax.set_title(f"Rata-rata Penyewaan Sepeda per jam ({start_date} s/d {end_date})", fontsize=20)
 st.pyplot(fig)
 
 # Row 3: Visualisasi Pertanyaan 2 & Clustering
@@ -95,5 +95,6 @@ with col_b:
     st.pyplot(fig3)
 
 st.caption(f"Copyright © 2026 | Analisis oleh Bima Indra Sakti")
+
 
 
